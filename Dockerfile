@@ -1,4 +1,3 @@
-# Use PHP 7.4 with Apache as base
 FROM php:7.4-apache
 
 # Install system dependencies
@@ -16,8 +15,8 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache modules
 RUN a2enmod rewrite
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Install specific Composer version
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.26
 
 # Set working directory
 WORKDIR /var/www/html
@@ -43,7 +42,9 @@ RUN cd extensions \
 
 # Set composer config and install dependencies
 RUN composer config minimum-stability dev \
-    && composer update --no-dev
+    && composer config prefer-stable true \
+    && composer update --no-dev --no-plugins \
+    && composer require wikimedia/composer-merge-plugin:1.5.0
 
 # Move Flow extension
 RUN mv vendor/mediawiki/flow extensions/Flow
@@ -51,7 +52,6 @@ RUN mv vendor/mediawiki/flow extensions/Flow
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
-
 
 # Expose port 80
 EXPOSE 80
