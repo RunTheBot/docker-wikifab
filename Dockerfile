@@ -52,10 +52,6 @@ RUN mv vendor/mediawiki/flow extensions/Flow
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Copy configuration files (these need to be created separately)
-COPY LocalSettings.php /var/www/html/
-COPY LocalSettings.wikifab.php /var/www/html/
-COPY LocalSettings.i18n.php /var/www/html/
 
 # Expose port 80
 EXPOSE 80
