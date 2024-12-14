@@ -18,6 +18,11 @@ RUN a2enmod rewrite
 # Install specific Composer version
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.26
 
+# Configure Git to use HTTPS instead of SSH
+RUN git config --global url."https://github.com/".insteadOf git@github.com: \
+    && git config --global url."https://".insteadOf git:// \
+    && composer config --global github-oauth.github.com ${GITHUB_TOKEN:-}
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -43,7 +48,8 @@ RUN cd extensions \
 # Set composer config and install dependencies
 RUN composer config minimum-stability dev \
     && composer config prefer-stable true \
-    && composer update --no-dev --no-plugins \
+    && composer config -g github-protocols https \
+    && composer update --no-dev --no-plugins --prefer-dist \
     && composer require wikimedia/composer-merge-plugin:1.5.0
 
 # Move Flow extension
@@ -53,8 +59,6 @@ RUN mv vendor/mediawiki/flow extensions/Flow
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Expose port 80
 EXPOSE 80
 
-# Start Apache
 CMD ["apache2-foreground"]
