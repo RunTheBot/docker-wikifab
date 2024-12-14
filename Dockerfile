@@ -29,8 +29,12 @@ RUN mkdir -p /var/www/.composer && \
 
 # Configure Git for HTTPS
 USER composer
+ARG GITHUB_TOKEN
 RUN git config --global url."https://github.com/".insteadOf git@github.com: && \
-    git config --global url."https://".insteadOf git://
+    git config --global url."https://".insteadOf git:// && \
+    if [ -n "$GITHUB_TOKEN" ]; then \
+      composer config -g github-oauth.github.com $GITHUB_TOKEN; \
+    fi
 
 USER root
 
